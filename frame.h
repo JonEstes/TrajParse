@@ -28,7 +28,7 @@ void PrintAtoms(){
 
 std::cout << "Atom_id Species x_coord y_coord z_coord\n";
   for (int i = 0; i < size; i++){
-    std::cout << atoms.at(i).GetLammpsID() << " " << atoms.at(i).GetSpecies() << " " << atoms.at(i).GetXCoord() << " " << atoms.at(i).GetYCoord() << " " << atoms.at(i).GetZCoord()  <<"\n";
+    PrintAtom(i);
   } 
 }
 
@@ -36,6 +36,7 @@ void PrintAtom(int atom_index){
   if( atom_index > size-1){
     std::cout << "ERROR: Atom_index requested is greater than number of atoms in frame.\n";
   }else{
+  std::cout << "Atom_id Species x_coord y_coord z_coord\n";
   std::cout << atoms.at(atom_index).GetLammpsID() << " " << atoms.at(atom_index).GetSpecies() << " " << atoms.at(atom_index).GetXCoord() << " " << atoms.at(atom_index).GetYCoord() << " " << atoms.at(atom_index).GetZCoord()  <<"\n";
   }
 }
