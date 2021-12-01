@@ -16,7 +16,6 @@
 
 // This method holds code that should really live somewhere else, but I didn't want to figure it out at this time, so I just dumped the code here. As is, it is funcitonal, but I would love to find each of these functions a more elegant home
 
-namespace ofts { //FIXME not sure what to call these namespaces
 
 inline void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
@@ -35,5 +34,4 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 
-} // namespace
 #endif

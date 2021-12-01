@@ -1,3 +1,6 @@
+//#ifdef TRAJECTORY_H
+//#define TRAJECTORY_H
+
 #include "frame.h"
 #include <string>
 #include <vector>
@@ -6,16 +9,25 @@
 #include <stdlib.h>
 #include "utils.h"
 #include <cassert>
+#include <fstream>
 //Trajectory object
 
 class Traj{ 
 
   public:
-    Traj(std::string filename){
-      name = filename;
-      Populate(name);
+    //Constructors for trajectories with and without topology.
+    Traj(std::string traj_file_name, std::string top_file_name){
+      name = traj_file_name;
+      Parse_Trajectory(name);
+      top = 1;
     }
-    
+    Traj(std::string traj_file_name){
+      name = traj_file_name;
+      Parse_Trajectory(name);
+      top = 0;
+    }    
+
+ 
     void GetTrajInfo(){
       std::cout << "Trajectory contains " << n_frames << " frame(s).\n";
     }
@@ -26,97 +38,80 @@ class Traj{
       std::cout << "Box dimensions:\nx length: " << frames.at(frame_index).GetXDim() <<"\ny length: " << frames.at(frame_index).GetYDim() << "\nz length: " << frames.at(frame_index).GetZDim() << "\n";
     }
 
-    void PrintAtomInfoInFrame(int frame_index){
-    frames.at(frame_index).PrintAtoms(); 
-      }
-
-    void PrintAtom(int frame_index, int atom_index){
-      frames.at(frame_index).PrintAtom(atom_index);
-    }
 
 private:
   std::string name;
-  int natoms;
+  int natoms, top, timestep;
   int n_frames = 0;
   std::vector <Frame> frames;  
   double xbound,ybound,zbound;
+
+  std::ifstream dump_file;
+  std::vector<std::string> l;
+  std::string line;
   
-  void Populate(std::string name){
-    std::string line;
-    int timestep;
-    std::vector<std::string> l;
+
+  void Parse_Trajectory(std::string name){
 
     std::cout << "Reading in data from file.\n"; 
-    std::ifstream dump_file;
     dump_file.open(name);
-    if(!dump_file.is_open()) {std::cerr<<"Error! "<<name<<" does not exist!\n"<<std::endl; exit(1);}    
+    if(!dump_file.is_open()) {std::cerr<<"Error! "<<name<<" does not exist!\n"<<std::endl; exit(1);}   
     
+    Parse_Next_Frame();
+    Parse_Next_Frame();
+    Parse_Next_Frame();
+
+    }   
+
+  void Parse_Next_Frame(){
     //Initial population from header
     std::getline(dump_file,line);
-    while (!line.compare("ITEM: TIMESTEP")){
+
     assert(!line.compare("ITEM: TIMESTEP"));   
 
     std::getline(dump_file,line); 
-    l = ofts::split(line,' ');
+    l = split(line,' ');
     timestep = std::stoi(l[0]);
-    //std::cout<< "Timestep = " << timestep << ".\n";
     
     std::getline(dump_file,line);
     assert(!line.compare("ITEM: NUMBER OF ATOMS"));
 
     std::getline(dump_file,line);
-    l = ofts::split(line,' ');
+    l = split(line,' ');
     natoms = std::stoi(l[0]);
-    //std::cout<< "Number of Atoms = " << natoms << ".\n";
     
     std::getline(dump_file,line);
     assert(!line.compare("ITEM: BOX BOUNDS pp pp pp")); 
 
     std::getline(dump_file,line);
-    l = ofts::split(line,' ');
+    l = split(line,' ');
     xbound = (std::stod(l[1]) - std::stod(l[0]));   
         
     std::getline(dump_file,line);
-    l = ofts::split(line,' ');
+    l = split(line,' ');
     ybound = (std::stod(l[1]) - std::stod(l[0]));
 
     std::getline(dump_file,line);
-    l = ofts::split(line,' ');
+    l = split(line,' ');
     zbound = (std::stod(l[1]) - std::stod(l[0]));
-    
-    //std::cout << "Box dimensions: " << xbound << ", " << ybound << ", " << zbound << "\n";
         
     std::getline(dump_file,line);
-    assert(!line.compare("ITEM: ATOMS id type x y z"));
 
     Frame f(natoms,timestep,xbound,ybound,zbound);
-
     frames.push_back(f);
     n_frames++;
+    frames.at(n_frames-1).Enter_Header(line);
+
+
     for(int i = 0; i < natoms; i++){
       std::getline(dump_file,line);
-      l = ofts::split(line,' ');
-      frames.at(n_frames-1).Add_Atom(std::stoi(l[0]),std::stoi(l[1]), std::stod(l[2]),std::stod(l[3]),std::stod(l[4]));
-      //std::cout << "Added atom " << i+1 << "\n";
+      l = split(line,' ');
+      frames.at(n_frames-1).Add_Atom(line);
     }
-      std::getline(dump_file,line);
-    }
-    
-
-  }
-
-
+  }    
+  
 };
 
 
-
-
-
-
-
-
-
-
-
-
+//#endif
 
