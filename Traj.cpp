@@ -15,7 +15,7 @@ traj1.GetTrajInfo();
 
 Frame f = traj1.at(0);
 
-f.Print_Coords();
+f.PrintCoords();
 
 //traj1.PrintAtomInfoInFrame(0);
 //traj1.PrintAtomInfoInFrame(2);

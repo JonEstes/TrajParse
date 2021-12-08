@@ -33,16 +33,16 @@ int ParseColumnNamesFromHeader(std::string line){
    bool unscaled = true;
    bool wrapped = true;
    
-   x_index_ = Get_Param_Index("x",h);
+   x_index_ = GetParamaterIndex("x",h);
    if (x_index_ == -1){
-      x_index_ = Get_Param_Index("xs",h);
+      x_index_ = GetParamaterIndex("xs",h);
       unscaled = false;
       if (x_index_ == -1){
-        x_index_ = Get_Param_Index("xu",h);
+        x_index_ = GetParamaterIndex("xu",h);
         unscaled = true;
         wrapped = false;
         if (x_index_ == -1){
-          x_index_ = Get_Param_Index("xsu",h);
+          x_index_ = GetParamaterIndex("xsu",h);
           unscaled = false;
           wrapped = false;
         }
@@ -52,36 +52,34 @@ int ParseColumnNamesFromHeader(std::string line){
         }
       }
    }
-   y_index_ = Get_Param_Index("y",h);
-   z_index_ = Get_Param_Index("z",h);
+   y_index_ = GetParamaterIndex("y",h);
+   z_index_ = GetParamaterIndex("z",h);
 
 
-   id_index_ = Get_Param_Index("id",h);
+   id_index_ = GetParamaterIndex("id",h);
    if (id_index_ == -1){
       std::cout << "No atom id number found. Please ensure that your trajectory includes atom ids.";
       exit(1);
 
 
    }
-   species_index_ = Get_Param_Index("type",h);
+   species_index_ = GetParamaterIndex("type",h);
+   if (species_index_ != -1){has_species_index_ = true;}
    return gridsize;
 }
 
-int Eval_Header(std::string line){
+int EvalHeader(std::string line){
   std::vector<std::string> h = split(line,' ');
   gridsize = h.size()-2;
   h.erase(h.begin(),h.begin()+2);
   
-
-
-
   return gridsize;
 }
 
 
 
 
-void Add_Atom(std::string line){
+void AddAtom(std::string line){
   std::vector<std::string> l = split(line,' ');
   id_numbers.at(atom_iterator_) = stoi(l.at(id_index_));
   if (species_index_ != -1){
@@ -94,13 +92,21 @@ void Add_Atom(std::string line){
   atom_iterator_++;
 }
 
-void Print_Coords(){
+void PrintCoords(){
   for (int i = 0; i < size; i++){
     std::cout << coords.at(0).at(i) << " " << coords.at(1).at(i) << " " << coords.at(2).at(i) << "\n";
   }
 }
 
-int Get_Param_Index(std::string param, std::vector<std::string> atom){
+std::vector<double> GetBounds(){
+  std::vector<double> dim;
+  dim.resize(3);
+  dim[0] = x_bound_;
+  dim[1] = y_bound_;
+
+}
+
+int GetParamaterIndex(std::string param, std::vector<std::string> atom){
   int index = -1;
   for(int i = 0; i < atom.size(); i++){
     if (!atom.at(i).compare(param)){
@@ -120,7 +126,7 @@ std::vector<std::vector<double>> configuration;
 std::vector<std::vector<double>> coords;
 std::vector<std::string> atom_types;
 std::vector<int> id_numbers;
-
+bool has_species_index_ = false;
 
 };
 

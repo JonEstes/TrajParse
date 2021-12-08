@@ -121,7 +121,7 @@ private:
     for(int i = 0; i < natoms_; i++){
       std::getline(dump_file,line);
       l = split(line,' ');
-      frames.at(n_frames-1).Add_Atom(line);
+      frames.at(n_frames-1).AddAtom(line);
     }
     std::getline(dump_file,line);
     return line;
