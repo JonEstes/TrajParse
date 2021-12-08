@@ -24,8 +24,10 @@ class Trajectory{
       Parse_Trajectory(traj_file_name);
       topology_ = false;
     }    
-
- 
+    Trajectory(Frame frame){
+      frames.push_back(frame);
+    }
+    
     void GetTrajInfo(){
       std::cout << "Trajectory contains " << n_frames << " frame(s).\n";
     }
@@ -35,6 +37,11 @@ class Trajectory{
       std::cout << "Number of Particles: " << frames.at(frame_index).GetNatoms() << "\n";
       std::cout << "Box dimensions:\nx length: " << frames.at(frame_index).GetXDim() <<"\ny length: " << frames.at(frame_index).GetYDim() << "\nz length: " << frames.at(frame_index).GetZDim() << "\n";
     }
+
+    void AddFrameToTrajectory(Frame frame){
+      frames.push_back(frame);
+    }
+
 
     Frame& operator[](int index){
       if (index >= n_frames){
