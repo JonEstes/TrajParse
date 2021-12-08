@@ -8,10 +8,15 @@ using namespace std;
 
 int main(){
 
-Traj traj1("dump.coords.lammpstrj","test");
+Trajectory traj1("dump.coords.lammpstrj","test");
 
 traj1.GetFrameInfo(0);
 traj1.GetTrajInfo();
+
+Frame f = traj1.at(0);
+
+f.Print_Coords();
+
 //traj1.PrintAtomInfoInFrame(0);
 //traj1.PrintAtomInfoInFrame(2);
 }

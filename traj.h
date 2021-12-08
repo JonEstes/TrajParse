@@ -1,5 +1,5 @@
-//#ifdef TRAJECTORY_H
-//#define TRAJECTORY_H
+#ifndef TRAJECTORY_H
+#define TRAJECTORY_H
 
 #include "frame.h"
 #include <string>
@@ -12,19 +12,17 @@
 #include <fstream>
 //Trajectory object
 
-class Traj{ 
+class Trajectory{ 
 
   public:
     //Constructors for trajectories with and without topology.
-    Traj(std::string traj_file_name, std::string top_file_name){
-      name = traj_file_name;
-      Parse_Trajectory(name);
-      top = 1;
+    Trajectory(std::string traj_file_name, std::string topology_file_name){
+      Parse_Trajectory(traj_file_name);
+      topology_ = true;
     }
-    Traj(std::string traj_file_name){
-      name = traj_file_name;
-      Parse_Trajectory(name);
-      top = 0;
+    Trajectory(std::string traj_file_name){
+      Parse_Trajectory(traj_file_name);
+      topology_ = false;
     }    
 
  
@@ -38,35 +36,45 @@ class Traj{
       std::cout << "Box dimensions:\nx length: " << frames.at(frame_index).GetXDim() <<"\ny length: " << frames.at(frame_index).GetYDim() << "\nz length: " << frames.at(frame_index).GetZDim() << "\n";
     }
 
+    Frame& operator[](int index){
+      if (index >= n_frames){
+        std::cout << "Frame out of bounds. Exiting\n";
+        exit(1);
+      }else{
+        return frames[index];
+      }
+    }
+    Frame& at(int index){return operator[](index);}    
+
 
 private:
-  std::string name;
-  int natoms, top, timestep;
+  int natoms_, timestep;
+  bool topology_;
   int n_frames = 0;
   std::vector <Frame> frames;  
   double xbound,ybound,zbound;
 
   std::ifstream dump_file;
-  std::vector<std::string> l;
-  std::string line;
   
 
   void Parse_Trajectory(std::string name){
-
+    std::string line;
     std::cout << "Reading in data from file.\n"; 
     dump_file.open(name);
     if(!dump_file.is_open()) {std::cerr<<"Error! "<<name<<" does not exist!\n"<<std::endl; exit(1);}   
-    
-    Parse_Next_Frame();
-    Parse_Next_Frame();
-    Parse_Next_Frame();
+   
 
-    }   
-
-  void Parse_Next_Frame(){
-    //Initial population from header
     std::getline(dump_file,line);
+    while(1){ 
+      line = Parse_Next_Frame(line);
+      if (!line.compare("ITEM: TIMESTEP")){break;}
+    }
+  }   
 
+  std::string Parse_Next_Frame(std::string line){
+    //Initial population from header
+    //std::getline(dump_file,line);
+    std::vector<std::string> l;
     assert(!line.compare("ITEM: TIMESTEP"));   
 
     std::getline(dump_file,line); 
@@ -78,7 +86,7 @@ private:
 
     std::getline(dump_file,line);
     l = split(line,' ');
-    natoms = std::stoi(l[0]);
+    natoms_ = std::stoi(l[0]);
     
     std::getline(dump_file,line);
     assert(!line.compare("ITEM: BOX BOUNDS pp pp pp")); 
@@ -97,21 +105,23 @@ private:
         
     std::getline(dump_file,line);
 
-    Frame f(natoms,timestep,xbound,ybound,zbound);
+    Frame f(natoms_,timestep,xbound,ybound,zbound);
     frames.push_back(f);
     n_frames++;
-    frames.at(n_frames-1).Enter_Header(line);
+    frames.at(n_frames-1).ParseColumnNamesFromHeader(line);
 
 
-    for(int i = 0; i < natoms; i++){
+    for(int i = 0; i < natoms_; i++){
       std::getline(dump_file,line);
       l = split(line,' ');
       frames.at(n_frames-1).Add_Atom(line);
     }
+    std::getline(dump_file,line);
+    return line;
   }    
   
 };
 
 
-//#endif
+#endif
 
